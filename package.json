@@ -10,6 +10,8 @@
   },
   "devDependencies": {
     "@types/pdfkit": "^0.13.4",
-    "bun-types": "latest"
+    "@vitest/coverage-v8": "3.0.6",
+    "bun-types": "latest",
+    "vitest": "^3.0.6"
   }
-} 
+}

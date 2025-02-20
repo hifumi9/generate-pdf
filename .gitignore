@@ -1,1 +1,3 @@
-*.pdf 
+*.pdf
+node_modules/ 
+coverage/ 
