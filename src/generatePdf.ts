@@ -1,15 +1,23 @@
 import PDFDocument from "pdfkit";
 import fs from "fs";
 
-// Get command line arguments
-const args = process.argv.slice(2);
-if (args.length < 2) {
+// Get command line arguments without using 'as' operator
+const rawArgs: string[] = process.argv.slice(2);
+if (rawArgs.length < 2) {
   console.error(
     "Usage: bun run src/generatePdf.ts <output-filename> <number-of-pages> [file-size-MB]"
   );
   process.exit(1);
 }
-const [outputFileName, numPages, targetSizeMB] = args;
+const outputFileName: string = rawArgs[0];
+const pageCountStr: string = rawArgs[1];
+const targetSizeMB: string | undefined = rawArgs[2];
+
+const pageCount: number = parseInt(pageCountStr, 10);
+if (isNaN(pageCount) || pageCount <= 0) {
+  console.error("Invalid number of pages provided.");
+  process.exit(1);
+}
 
 const doc = new PDFDocument({
   size: "A4",
@@ -19,7 +27,6 @@ const doc = new PDFDocument({
 const stream = fs.createWriteStream(outputFileName);
 doc.pipe(stream);
 
-const pageCount = parseInt(numPages);
 for (let i = 1; i <= pageCount; i++) {
   doc.addPage();
 
@@ -35,18 +42,18 @@ for (let i = 1; i <= pageCount; i++) {
 doc.end();
 
 stream.on("finish", () => {
-  const pageCount = parseInt(numPages);
   if (targetSizeMB) {
-    const targetSizeBytes = parseFloat(targetSizeMB) * 1024 * 1024;
+    const targetSize: number = parseFloat(targetSizeMB) * 1024 * 1024;
     const stats = fs.statSync(outputFileName);
-    const currentSize = stats.size;
-    if (currentSize < targetSizeBytes) {
-      const paddingBytes = targetSizeBytes - currentSize;
-      const fd = fs.openSync(outputFileName, "a");
-      const buf = Buffer.alloc(1024, " ");
-      let bytesToWrite = paddingBytes;
+    const currentSize: number = stats.size;
+
+    if (currentSize < targetSize) {
+      const paddingBytes: number = targetSize - currentSize;
+      const fd: number = fs.openSync(outputFileName, "a");
+      const buf: Buffer = Buffer.alloc(1024, " ");
+      let bytesToWrite: number = paddingBytes;
       while (bytesToWrite > 0) {
-        let chunk = Math.min(bytesToWrite, 1024);
+        const chunk: number = Math.min(bytesToWrite, 1024);
         fs.writeSync(fd, buf, 0, chunk);
         bytesToWrite -= chunk;
       }
@@ -54,7 +61,7 @@ stream.on("finish", () => {
       console.log(
         `Appended ${paddingBytes} bytes to match target size of ${targetSizeMB} MB.`
       );
-    } else if (currentSize > targetSizeBytes) {
+    } else if (currentSize > targetSize) {
       console.warn(
         "Warning: The generated PDF is larger than the target file size."
       );
