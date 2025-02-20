@@ -1,0 +1,15 @@
+{
+  "name": "generate-pdf",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/generatePdf.ts"
+  },
+  "dependencies": {
+    "pdfkit": "^0.14.0"
+  },
+  "devDependencies": {
+    "@types/pdfkit": "^0.13.4",
+    "bun-types": "latest"
+  }
+} 
